@@ -1,0 +1,11 @@
+{
+  "accion": "video_infantil",
+  "carpeta_imagenes": "/media/susej/C06E72656E72545E/Users/PC/Desktop/creador_videos/imagenes_infantiles",
+  "imagenes": [],
+  "texto_narracion": "¿cómo puede volar un avión siendo tan pesado?!!\nMira ese gigante de metal surcando el cielo. ¡Pesa toneladas y aun así vuela! ¿Cómo es posible?”\n\nSi lanzas una piedra, se cae. Si sueltas un camión, se estrella. Pero un avión... ¿cómo puede un avión tan pesado volar?”\n\nImagina que el ala del avión es una mano invisible. Esa mano no se queda quieta: empuja el aire hacia abajo con una fuerza increíble. Y cuando empujas algo hacia abajo, tú te empujas hacia arriba.”\n\nEl ala tiene una forma especial. El aire corre más rápido por encima y más lento por debajo. Eso crea una zona de baja presión arriba. El aire de abajo, que empuja hacia arriba, gana la batalla. Es como cuando sacas la mano por la ventana del coche y el aire te empuja hacia arriba. El ala hace eso mismo, pero con mucha más fuerza.”\n\nY aquí viene lo increíble: el aire que un avión empuja hacia abajo para despegar puede pesar más que un elefante. ¡Un elefante invisible de aire!”\n\nAsí que no es magia. Es una mano invisible de aire que empuja hacia abajo para que el avión suba.”\n\n¿Qué otra cosa increíble de la vida cotidiana quieres descubrir? ¡Síguenos para descubrir cómo funciona el mundo!”",
+  "voz": "es-MX-DaliaNeural",
+  "transicion": "dissolve",
+  "duracion_transicion_segundos": 0.7,
+  "subtitulos": true,
+  "estilo_subtitulos": "infantil"
+}

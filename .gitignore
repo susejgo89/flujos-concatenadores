@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+*.log
+
+# Video y audio generados
+videos_listos/*.mp4
+videos_listos/*.mp3
+videos_listos/*.ass
+videos_listos/temp_render/
+
+# Temporales del sistema y archivos viejos
+archivo_antiguo/
+.DS_Store
+*.swp
+*.swo
+
+# Mantener carpetas con .gitkeep
+!videos_listos/clips/.gitkeep
+!imagenes_infantiles/.gitkeep
+!imagenes_para_video/.gitkeep

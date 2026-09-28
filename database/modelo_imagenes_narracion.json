@@ -1,0 +1,170 @@
+{
+  "name": "Agente IA – Video con Imágenes, Zoom Suave y Voz Latina (9:16)",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "trigger_manual_img",
+      "name": "Probar ahora",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ==========================================================================\n// CONFIGURACIÓN DE TUS IMÁGENES Y NARRACIÓN EN OFF\n// ==========================================================================\n\n// 1. CARPETA DONDE ESTÁN TUS IMÁGENES:\n// Coloca tus fotos (ej. 1.jpg, 2.jpg, ... o foto1.png, etc.) en esta carpeta.\nconst carpetaImagenes = '/media/susej/C06E72656E72545E/Users/PC/Desktop/creador_videos/imagenes_para_video';\n\n// 2. LISTA DE IMÁGENES A USAR (OPCIONAL):\n// - Si dejas [] (vacío), tomará automáticamente TODAS las imágenes de la carpeta en orden numérico/alfabético.\n// - O puedes especificar los nombres exactos: ['1.jpg', '2.jpg', '3.jpg']\nconst imagenes = [];\n\n// 3. TEXTO DE LA NARRACIÓN EN OFF (TIENES 2 OPCIONES):\n// - OPCIÓN A: Pega directamente aquí tu narración como texto normal.\n// - OPCIÓN B: Déjalo vacío ('') y guarda un archivo 'narracion.txt' en tu carpeta de imágenes.\nconst textoNarracion = `Tres misterios ancestrales que la ciencia moderna aún no ha podido resolver. El último de ellos cambiará para siempre todo lo que creías saber sobre nuestro pasado.`;\n\n// 4. VOZ MASCULINA EN ESPAÑOL LATINOAMERICANO (100% Gratuita):\n// - 'es-MX-JorgeNeural'   -> México (Estilo Narrador Documental / YouTube Shorts - Recomendada)\n// - 'es-CO-GonzaloNeural' -> Colombia (Cálida y neutral)\n// - 'es-AR-TomasNeural'   -> Argentina\n// - 'es-PE-AlexNeural'    -> Perú\nconst voz = 'es-MX-JorgeNeural';\n\n// 5. TRANSICIONES Y ESTILO VISUAL:\n// - 'dissolve' (desvanecimiento cruzado suave entre imágenes)\n// - 'fade' (fundido suave)\n// - 'wipeleft' / 'wiperight' / 'slideup' / 'circlecrop'\nconst transicion = 'dissolve';\nconst duracionTransicionSegundos = 0.6;\n\n// 6. SUBTÍTULOS LLAMATIVOS (ROJO Y NEGRO / DOCUMENTAL):\n// true = quema subtítulos cinematográficos con palabras clave en Rojo Intenso y borde negro grueso (sin verdes ni amarillos).\nconst subtitulos = true;\nconst estiloSubtitulos = 'documental';\n\nreturn [{\n  json: {\n    accion: 'imagenes_narracion',\n    carpeta_imagenes: carpetaImagenes,\n    imagenes: imagenes,\n    texto_narracion: textoNarracion,\n    voz: voz,\n    transicion: transicion,\n    duracion_transicion_segundos: duracionTransicionSegundos,\n    subtitulos: subtitulos,\n    estilo_subtitulos: estiloSubtitulos\n  }\n}];"
+      },
+      "id": "config_img_narracion_node",
+      "name": "Configuración de Imágenes y Guion",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        260,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://172.17.0.1:5679",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 900000
+        }
+      },
+      "id": "ffmpeg_img_narracion_node",
+      "name": "Crear Video (FFmpeg + Voz Latina + Ken Burns)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        540,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=NARRACIÓN DEL VIDEO:\n\"{{ $json.texto_narracion || $('Configuración de Imágenes y Guion').first().json.texto_narracion }}\"\n\nDURACIÓN DEL VIDEO: {{ $json.duracion_segundos }} segundos ({{ $json.total_imagenes }} imágenes animadas con zoom y transiciones).\n\nDiseña el copy viral perfecto para publicar este video en TikTok, Instagram Reels y YouTube Shorts.",
+        "options": {
+          "systemMessage": "Eres un Director Creativo y Estratega de Contenido Viral para Redes Sociales (TikTok, YouTube Shorts, Instagram Reels).\n\nTU MISIÓN:\nAnalizar la narración en off del video recién renderizado y generar el copy viral definitivo para publicarlo.\n\nREGLAS DE COPYWRITING:\n1. TÍTULO / GANCHO (Hook): Una sola línea corta en MAYÚSCULAS que capture la atención de inmediato en los primeros 2 segundos.\n2. DESCRIPCIÓN: 2 a 3 líneas intrigantes que inviten al espectador a ver hasta el final.\n3. LLAMADO A LA ACCIÓN (CTA): Una pregunta persuasiva para incentivar comentarios y suscripciones.\n4. HASHTAGS: De 6 a 10 hashtags virales relevantes.\n\nSALIDA OBLIGATORIA (Exclusivamente formato JSON válido, sin backticks ni texto adicional):\n{\n  \"titulo_gancho\": \"[TÍTULO VIRAL EN MAYÚSCULAS]\",\n  \"descripcion\": \"[Descripción intrigante del video]\",\n  \"cta\": \"[¿Cuál de estos misterios te impactó más? Deja tu opinión en los comentarios y síguenos]\",\n  \"hashtags\": [\"#misterio\", \"#historia\", \"#curiosidades\", \"#shorts\", \"#documental\"]\n}"
+        }
+      },
+      "id": "agent_copy_img_node",
+      "name": "Agente IA – Copy Viral y Hashtags",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        820,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-1.5-flash",
+        "options": {}
+      },
+      "id": "lm_gemini_img_node",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        820,
+        420
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "lExZUtWLTVrA0gd6",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const videoInfo = $('Crear Video (FFmpeg + Voz Latina + Ken Burns)').first().json;\nconst aiRaw = $input.first().json.output || $input.first().json.text || '';\n\nlet copyData = {};\ntry {\n  const match = aiRaw.match(/\\{[\\s\\S]*\\}/);\n  copyData = JSON.parse(match ? match[0] : aiRaw);\n} catch (e) {\n  copyData = {\n    titulo_gancho: 'MISTERIOS QUE LA CIENCIA NO EXPLICA',\n    descripcion: 'Descubre los enigmas más impactantes que desafían la lógica moderna.',\n    cta: '¿Cuál te sorprendió más? Comenta y síguenos para más contenido fascinante.',\n    hashtags: ['#misterio', '#curiosidades', '#shorts', '#viral']\n  };\n}\n\nreturn [{\n  json: {\n    status: '🎉 ¡Video con imágenes animadas, transiciones y voz latina generado con éxito!',\n    archivo_final: videoInfo.video_final_path || videoInfo.video_path || '/media/susej/C06E72656E72545E/Users/PC/Desktop/creador_videos/videos_listos/video_narrado_final.mp4',\n    duracion_segundos: videoInfo.duracion_segundos || 0,\n    total_imagenes_animadas: videoInfo.total_imagenes || 0,\n    voz_narrador: videoInfo.voz_utilizada || 'es-MX-JorgeNeural (Masculina Latina)',\n    transicion_utilizada: videoInfo.transicion_utilizada || 'dissolve',\n    subtitulos_incluidos: videoInfo.subtitulos_incluidos !== false,\n    copy_para_redes: {\n      titulo_gancho: copyData.titulo_gancho,\n      descripcion: copyData.descripcion,\n      cta: copyData.cta,\n      hashtags: copyData.hashtags || []\n    },\n    carpeta_en_tu_pc: 'creador_videos/videos_listos/'\n  }\n}];"
+      },
+      "id": "resultado_img_narracion_node",
+      "name": "Resultado Final (.mp4 + Copy)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        200
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Probar ahora": {
+      "main": [
+        [
+          {
+            "node": "Configuración de Imágenes y Guion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configuración de Imágenes y Guion": {
+      "main": [
+        [
+          {
+            "node": "Crear Video (FFmpeg + Voz Latina + Ken Burns)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear Video (FFmpeg + Voz Latina + Ken Burns)": {
+      "main": [
+        [
+          {
+            "node": "Agente IA – Copy Viral y Hashtags",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente IA – Copy Viral y Hashtags",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente IA – Copy Viral y Hashtags": {
+      "main": [
+        [
+          {
+            "node": "Resultado Final (.mp4 + Copy)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timezone": "America/Mexico_City"
+  },
+  "versionId": "c2b3d4e5-f6a7-8b9c-0d1e-2f3a4b5c6d7e",
+  "meta": {
+    "instanceId": "7360062f295944471577ac697535dbd144cef4df05828e5474e3d7af599a06d4"
+  },
+  "nodeGroups": [],
+  "id": "AgenteImagenesNarracionVozLatina",
+  "tags": []
+}
