@@ -217,7 +217,10 @@ def send_audio(chat_id, audio_path, caption="", title="Muestra de Voz", performe
                 "performer": performer
             }
             res = requests.post(url, data=data, files=files, timeout=60)
-            return res.json().get("ok", False)
+            res_json = res.json()
+            if not res_json.get("ok"):
+                print(f"⚠️ Telegram rechazó sendAudio ({audio_path}): {res_json}", flush=True)
+            return res_json.get("ok", False)
     except Exception as e:
         print(f"⚠️ Error enviando audio a chat {chat_id}: {e}", flush=True)
         return False
@@ -524,9 +527,12 @@ def run_telegram_bot():
                     continue
 
                 text = (msg.get("text") or "").strip()
+                text_lower = text.lower().strip()
+                if text:
+                    print(f"📩 Mensaje de {user_label} ({chat_id}): '{text}'", flush=True)
 
                 # 2. Comando /start o /ayuda
-                if text.startswith("/start") or text.startswith("/help") or text.startswith("/ayuda"):
+                if text_lower.startswith("/start") or text_lower.startswith("/help") or text_lower.startswith("/ayuda") or text_lower == "ayuda":
                     print(f"👋 Usuario autorizado conectado: {user_label}", flush=True)
                     send_message(
                         chat_id,
@@ -541,7 +547,7 @@ def run_telegram_bot():
                     continue
 
                 # 3. Comando /cancelar o /nuevo
-                if text in ["/cancelar", "/nuevo", "/reset", "/limpiar"]:
+                if text_lower in ["/cancelar", "/nuevo", "/reset", "/limpiar", "cancelar", "reiniciar"]:
                     with media_lock:
                         incoming_media.pop(chat_id, None)
                     with sessions_lock:
@@ -557,7 +563,17 @@ def run_telegram_bot():
                     continue
 
                 # 4. Comando /voces o /abuelo (Audición interactiva directa en Telegram)
-                if text.startswith("/voces") or text.startswith("/abuelo") or text.startswith("/muestras"):
+                is_abuelo_request = (
+                    text_lower.startswith("/voces")
+                    or text_lower.startswith("/abuelo")
+                    or text_lower.startswith("/muestras")
+                    or text_lower.startswith("/narrador")
+                    or text_lower in ["abuelo", "voces", "muestras", "abuelito", "abuelos", "narrador", "escuchar voces"]
+                    or "tipo abuelo" in text_lower
+                    or "voz de abuelo" in text_lower
+                    or "como abuelo" in text_lower
+                )
+                if is_abuelo_request:
                     current_v = user_voice_selection.get(chat_id, VOICE_PROFILES["luis"])
                     send_message(
                         chat_id,
@@ -568,28 +584,28 @@ def run_telegram_bot():
 
                     samples = [
                         (
-                            "muestras_abuelo/gonzalo_abuelo.mp3",
+                            os.path.join(BASE_DIR, "muestras_abuelo", "gonzalo_abuelo.mp3"),
                             "👴 <b>1. Gonzalo (Colombia)</b>\n"
                             "• <i>Estilo:</i> Dulce, tierno, pausado y afectuoso (el abuelo entrañable).\n"
                             "• Para activarlo toca 👉 /usar_gonzalo",
                             "Gonzalo - Abuelo Dulce"
                         ),
                         (
-                            "muestras_abuelo/luis_abuelo.mp3",
+                            os.path.join(BASE_DIR, "muestras_abuelo", "luis_abuelo.mp3"),
                             "👴 <b>2. Luis (Ecuador - Calibrado Abuelo)</b>\n"
                             "• <i>Estilo:</i> Grave, paternal, sereno y sabio (el abuelo patriarca).\n"
                             "• Para activarlo toca 👉 /usar_luis_abuelo",
                             "Luis - Abuelo Sabio"
                         ),
                         (
-                            "muestras_abuelo/manuel_abuelo.mp3",
+                            os.path.join(BASE_DIR, "muestras_abuelo", "manuel_abuelo.mp3"),
                             "👴 <b>3. Manuel (Cuba)</b>\n"
                             "• <i>Estilo:</i> Maduro, campechano, cálido y narrador de fogata.\n"
                             "• Para activarlo toca 👉 /usar_manuel",
                             "Manuel - Abuelo Fogata"
                         ),
                         (
-                            "muestras_abuelo/alonso_abuelo.mp3",
+                            os.path.join(BASE_DIR, "muestras_abuelo", "alonso_abuelo.mp3"),
                             "👴 <b>4. Alonso (Neutro)</b>\n"
                             "• <i>Estilo:</i> Clásico, respetable, pausado (cronista / historiador veterano).\n"
                             "• Para activarlo toca 👉 /usar_alonso",
@@ -601,6 +617,8 @@ def run_telegram_bot():
                         if os.path.exists(s_path):
                             send_audio(chat_id, s_path, caption=s_cap, title=s_title, performer="Creador de Videos")
                             time.sleep(0.4)
+                        else:
+                            print(f"⚠️ Archivo de muestra no encontrado: {s_path}", flush=True)
 
                     send_message(
                         chat_id,
@@ -609,8 +627,8 @@ def run_telegram_bot():
                     continue
 
                 # 5. Comandos para cambiar de voz (/usar_...)
-                if text in ["/usar_gonzalo", "/usar_luis_abuelo", "/usar_luis", "/usar_manuel", "/usar_alonso"]:
-                    key = text.replace("/usar_", "")
+                if text_lower in ["/usar_gonzalo", "/usar_luis_abuelo", "/usar_luis", "/usar_manuel", "/usar_alonso"]:
+                    key = text_lower.replace("/usar_", "")
                     if key in VOICE_PROFILES:
                         user_voice_selection[chat_id] = VOICE_PROFILES[key]
                         v = VOICE_PROFILES[key]
@@ -624,7 +642,7 @@ def run_telegram_bot():
                     continue
 
                 # 6. Comando /voz (Consultar voz actual)
-                if text == "/voz":
+                if text_lower in ["/voz", "voz", "mi voz", "/voces_actual"]:
                     current_v = user_voice_selection.get(chat_id, VOICE_PROFILES["luis"])
                     send_message(
                         chat_id,
