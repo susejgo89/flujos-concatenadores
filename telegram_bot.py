@@ -230,40 +230,12 @@ def send_audio(chat_id, audio_path, caption="", title="Muestra de Voz", performe
 # PERFILES DE VOZ Y PERSONALIZACIÓN DE NARRADOR
 # ==============================================================================
 VOICE_PROFILES = {
-    "luis": {
-        "voz": "es-EC-LuisNeural",
-        "pitch": "-4Hz",
-        "rate": "+0%",
-        "nombre": "Luis (Hombre Maduro / Cálido)",
-        "desc": "Tono profundo y cálido de hombre maduro."
-    },
     "luis_abuelo": {
         "voz": "es-EC-LuisNeural",
         "pitch": "-6Hz",
         "rate": "-10%",
         "nombre": "Luis (Abuelo Sabio / Paternal)",
         "desc": "Calibrado más grave y pausado, como un patriarca sabio."
-    },
-    "gonzalo": {
-        "voz": "es-CO-GonzaloNeural",
-        "pitch": "-5Hz",
-        "rate": "-10%",
-        "nombre": "Gonzalo (Abuelo Dulce / Cariñoso)",
-        "desc": "Voz muy tierna, serena y afectuosa de abuelito entrañable."
-    },
-    "manuel": {
-        "voz": "es-CU-ManuelNeural",
-        "pitch": "-5Hz",
-        "rate": "-8%",
-        "nombre": "Manuel (Abuelo de Fogata / Pueblo)",
-        "desc": "Tono campechano, cercano y narrador de pueblo."
-    },
-    "alonso": {
-        "voz": "es-US-AlonsoNeural",
-        "pitch": "-5Hz",
-        "rate": "-10%",
-        "nombre": "Alonso (Abuelo Historiador)",
-        "desc": "Voz clásica, pausada y respetable de cronista o documental."
     }
 }
 user_voice_selection = {}
@@ -541,7 +513,7 @@ def run_telegram_bot():
                         f"1️⃣ Envía todas tus <b>fotos</b> (como álbum, sueltas o carpeta de archivos sin comprimir).\n"
                         f"2️⃣ Envíame el guion largo como un <b>mensaje normal de chat</b> (o un archivo .txt).\n"
                         f"<i>(¡O también puedes enviar el texto primero y las fotos después!)</i>\n\n"
-                        f"🎙️ <i>Escribe /voces o /abuelo para escuchar muestras y elegir a tu narrador.</i>\n"
+                        f"🎙️ <i>Narrador exclusivo: <b>Luis (Abuelo Sabio / Paternal)</b>. Escribe /voz o /abuelo para escuchar su muestra de audio.</i>\n"
                         f"🛑 <i>Escribe /cancelar en cualquier momento para reiniciar todo.</i>"
                     )
                     continue
@@ -562,94 +534,51 @@ def run_telegram_bot():
                     )
                     continue
 
-                # 4. Comando /voces o /abuelo (Audición interactiva directa en Telegram)
+                # 4. Comando /voces, /abuelo o /voz (Muestra del narrador oficial)
                 is_abuelo_request = (
                     text_lower.startswith("/voces")
                     or text_lower.startswith("/abuelo")
                     or text_lower.startswith("/muestras")
                     or text_lower.startswith("/narrador")
-                    or text_lower in ["abuelo", "voces", "muestras", "abuelito", "abuelos", "narrador", "escuchar voces"]
+                    or text_lower.startswith("/voz")
+                    or text_lower in ["abuelo", "voces", "muestras", "abuelito", "abuelos", "narrador", "voz", "mi voz", "/voces_actual", "escuchar voces"]
                     or "tipo abuelo" in text_lower
                     or "voz de abuelo" in text_lower
                     or "como abuelo" in text_lower
                 )
                 if is_abuelo_request:
-                    current_v = user_voice_selection.get(chat_id, VOICE_PROFILES["luis_abuelo"])
+                    current_v = VOICE_PROFILES["luis_abuelo"]
+                    user_voice_selection[chat_id] = current_v
                     send_message(
                         chat_id,
-                        f"👴 <b>Audición de Voces Tipo Abuelo / Narrador Sabio</b>\n\n"
-                        f"📌 Tu voz activa actual es: <b>{current_v['nombre']}</b>\n\n"
-                        f"A continuación te envío <b>4 muestras de audio</b> con estilo abuelo/historiador para que las escuches y toques cuál prefieres:"
+                        f"🎙️ <b>Narrador Oficial Único del Bot</b>\n\n"
+                        f"👴 <b>{current_v['nombre']}</b>\n"
+                        f"• <i>Estilo:</i> {current_v['desc']}\n"
+                        f"• <i>Configuración:</i> {current_v['voz']} (pitch: {current_v['pitch']}, rate: {current_v['rate']})\n\n"
+                        f"A continuación te envío la muestra de audio para que la escuches:"
                     )
 
-                    samples = [
-                        (
-                            os.path.join(BASE_DIR, "muestras_abuelo", "gonzalo_abuelo.mp3"),
-                            "👴 <b>1. Gonzalo (Colombia)</b>\n"
-                            "• <i>Estilo:</i> Dulce, tierno, pausado y afectuoso (el abuelo entrañable).\n"
-                            "• Para activarlo toca 👉 /usar_gonzalo",
-                            "Gonzalo - Abuelo Dulce"
-                        ),
-                        (
-                            os.path.join(BASE_DIR, "muestras_abuelo", "luis_abuelo.mp3"),
-                            "👴 <b>2. Luis (Ecuador - Calibrado Abuelo)</b>\n"
-                            "• <i>Estilo:</i> Grave, paternal, sereno y sabio (el abuelo patriarca).\n"
-                            "• Para activarlo toca 👉 /usar_luis_abuelo",
-                            "Luis - Abuelo Sabio"
-                        ),
-                        (
-                            os.path.join(BASE_DIR, "muestras_abuelo", "manuel_abuelo.mp3"),
-                            "👴 <b>3. Manuel (Cuba)</b>\n"
-                            "• <i>Estilo:</i> Maduro, campechano, cálido y narrador de fogata.\n"
-                            "• Para activarlo toca 👉 /usar_manuel",
-                            "Manuel - Abuelo Fogata"
-                        ),
-                        (
-                            os.path.join(BASE_DIR, "muestras_abuelo", "alonso_abuelo.mp3"),
-                            "👴 <b>4. Alonso (Neutro)</b>\n"
-                            "• <i>Estilo:</i> Clásico, respetable, pausado (cronista / historiador veterano).\n"
-                            "• Para activarlo toca 👉 /usar_alonso",
-                            "Alonso - Abuelo Historiador"
-                        ),
-                    ]
-
-                    for s_path, s_cap, s_title in samples:
-                        if os.path.exists(s_path):
-                            send_audio(chat_id, s_path, caption=s_cap, title=s_title, performer="Creador de Videos")
-                            time.sleep(0.4)
-                        else:
-                            print(f"⚠️ Archivo de muestra no encontrado: {s_path}", flush=True)
-
-                    send_message(
-                        chat_id,
-                        "💡 <i>Para volver a la voz original de Luis maduro toca 👉 /usar_luis</i>"
-                    )
-                    continue
-
-                # 5. Comandos para cambiar de voz (/usar_...)
-                if text_lower in ["/usar_gonzalo", "/usar_luis_abuelo", "/usar_luis", "/usar_manuel", "/usar_alonso"]:
-                    key = text_lower.replace("/usar_", "")
-                    if key in VOICE_PROFILES:
-                        user_voice_selection[chat_id] = VOICE_PROFILES[key]
-                        v = VOICE_PROFILES[key]
-                        send_message(
-                            chat_id,
-                            f"✅ <b>¡Voz cambiada exitosamente!</b>\n\n"
-                            f"🗣️ <b>Voz activa:</b> {v['nombre']}\n"
-                            f"📖 <i>{v['desc']}</i>\n\n"
-                            f"Tus próximos videos se crearán automáticamente con esta voz."
+                    sample_path = os.path.join(BASE_DIR, "muestras_abuelo", "luis_abuelo.mp3")
+                    if os.path.exists(sample_path):
+                        send_audio(
+                            chat_id, sample_path,
+                            caption="👴 <b>Luis (Ecuador - Calibrado Abuelo)</b>\nNarrador oficial para todos tus videos.",
+                            title="Luis - Abuelo Sabio",
+                            performer="Creador de Videos"
                         )
+                    else:
+                        print(f"⚠️ Archivo de muestra no encontrado: {sample_path}", flush=True)
                     continue
 
-                # 6. Comando /voz (Consultar voz actual)
-                if text_lower in ["/voz", "voz", "mi voz", "/voces_actual"]:
-                    current_v = user_voice_selection.get(chat_id, VOICE_PROFILES["luis_abuelo"])
+                # 5. Comando /usar_luis_abuelo (Confirmación)
+                if text_lower in ["/usar_luis_abuelo", "/usar_luis", "usar luis"]:
+                    user_voice_selection[chat_id] = VOICE_PROFILES["luis_abuelo"]
+                    v = VOICE_PROFILES["luis_abuelo"]
                     send_message(
                         chat_id,
-                        f"🎙️ <b>Voz actual de tu narrador:</b>\n"
-                        f"👉 <b>{current_v['nombre']}</b>\n"
-                        f"<i>{current_v['desc']}</i>\n\n"
-                        f"Para escuchar muestras y cambiarla escribe /voces o /abuelo."
+                        f"✅ <b>Voz activa:</b> {v['nombre']}\n\n"
+                        f"📖 <i>{v['desc']}</i>\n\n"
+                        f"Todos tus videos se narran automáticamente con esta voz."
                     )
                     continue
 
