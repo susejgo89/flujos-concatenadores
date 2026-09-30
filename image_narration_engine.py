@@ -389,7 +389,7 @@ def process_image_narration(params):
         if params.get("accion") == "video_infantil" or "infantil" in str(carpeta_imagenes).lower():
             voz = "es-VE-PaolaNeural"
         else:
-            voz = "es-MX-JorgeNeural"
+            voz = "es-EC-LuisNeural"
     transicion = params.get("transicion") or "dissolve"
     transicion_dur = float(params.get("duracion_transicion_segundos") or 0.6)
     activar_subtitulos = params.get("subtitulos", True)
@@ -466,6 +466,7 @@ def process_image_narration(params):
 
     # 3. Generar la narración en off con Edge-TTS
     timestamp = time.strftime("%Y%m%d_%H%M%S")
+    audio_path = os.path.join(VIDEOS_DIR, f"audio_narracion_{timestamp}.mp3")
     pitch = params.get("pitch") or ("-6Hz" if "luis" in voz.lower() else "+0Hz")
     rate = params.get("rate") or ("-10%" if "luis" in voz.lower() else "+0%")
     words_timing = generate_tts_voice(texto_narracion, audio_path, voice=voz, pitch=pitch, rate=rate)

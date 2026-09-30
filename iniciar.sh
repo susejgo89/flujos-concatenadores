@@ -13,7 +13,7 @@ if curl -s http://localhost:5679/health > /dev/null; then
     echo "✅ Servicio de renderizado ya está corriendo en el puerto 5679."
 else
     echo "🎬 Iniciando servicio de renderizado (render_service.py)..."
-    nohup python3 "$DIR/render_service.py" > "$DIR/render_service.log" 2>&1 &
+    setsid nohup python3 "$DIR/render_service.py" > "$DIR/render_service.log" 2>&1 < /dev/null &
     sleep 2
     if curl -s http://localhost:5679/health > /dev/null; then
         echo "✅ Servicio de renderizado iniciado con éxito."
@@ -36,7 +36,7 @@ if pgrep -f "telegram_bot.py" > /dev/null; then
     echo "✅ Bot de Telegram ya está activo."
 else
     echo "🤖 Iniciando Bot de Telegram (@Su_creador_videos_bot)..."
-    nohup python3 "$DIR/telegram_bot.py" > "$DIR/telegram_bot.log" 2>&1 &
+    setsid nohup python3 "$DIR/telegram_bot.py" > "$DIR/telegram_bot.log" 2>&1 < /dev/null &
     sleep 1
     if pgrep -f "telegram_bot.py" > /dev/null; then
         echo "✅ Bot de Telegram iniciado con éxito."
