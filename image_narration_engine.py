@@ -20,6 +20,7 @@ import re
 import math
 import shutil
 import asyncio
+import concurrent.futures
 import edge_tts
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -381,7 +382,12 @@ def process_image_narration(params):
     # 1. Configuración de entrada
     carpeta_imagenes = params.get("carpeta_imagenes") or DEFAULT_IMAGES_DIR
     texto_narracion = params.get("texto_narracion") or params.get("narracion") or params.get("guion") or ""
-    voz = params.get("voz") or "es-MX-JorgeNeural"
+    voz = params.get("voz")
+    if not voz:
+        if params.get("accion") == "video_infantil" or "infantil" in str(carpeta_imagenes).lower():
+            voz = "es-VE-PaolaNeural"
+        else:
+            voz = "es-MX-JorgeNeural"
     transicion = params.get("transicion") or "dissolve"
     transicion_dur = float(params.get("duracion_transicion_segundos") or 0.6)
     activar_subtitulos = params.get("subtitulos", True)
@@ -474,14 +480,20 @@ def process_image_narration(params):
 
     print(f"🎬 Duración por imagen animada: {clip_dur:.2f}s (Transición: {transicion} {transicion_dur}s)")
 
-    # 5. Generar los clips animados individuales (Ken Burns)
-    temp_clips = []
-    print("🎨 Creando efectos suaves de Zoom y Paneo para cada imagen...")
-    for i, imp in enumerate(image_paths):
+    # 5. Generar los clips animados individuales (Ken Burns en paralelo)
+    temp_clips = [None] * n_images
+    print("🎨 Creando efectos suaves de Zoom y Paneo para cada imagen (procesamiento en paralelo)...")
+
+    def _render_single_clip(item):
+        i, imp = item
         clip_file = os.path.join(TEMP_DIR, f"clip_anim_{timestamp}_{i:03d}.mp4")
         print(f"   ↳ Procesando imagen {i + 1}/{n_images}: {os.path.basename(imp)}...")
         create_animated_clip(imp, clip_dur, i, clip_file, fps=30, width=1080, height=1920)
-        temp_clips.append(clip_file)
+        return i, clip_file
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+        for idx, cfile in executor.map(_render_single_clip, enumerate(image_paths)):
+            temp_clips[idx] = cfile
 
     tipo_video = "infantil" if estilo_subtitulos == "infantil" else "narrado"
 
@@ -535,9 +547,11 @@ def process_image_narration(params):
         "-map", f"{audio_idx}:a",
         "-c:v", "libx264",
         "-preset", "veryfast",
-        "-crf", "22",
+        "-crf", "24",
+        "-maxrate", "3500k",
+        "-bufsize", "7000k",
         "-c:a", "aac",
-        "-b:a", "192k",
+        "-b:a", "128k",
         "-pix_fmt", "yuv420p",
         "-shortest",
         output_mp4

@@ -5,6 +5,11 @@ __pycache__/
 venv/
 *.log
 
+# Variables de entorno y secretos
+.env
+.env.*
+!.env.example
+
 # Video y audio generados
 videos_listos/*.mp4
 videos_listos/*.mp3
@@ -13,6 +18,7 @@ videos_listos/temp_render/
 
 # Temporales del sistema y archivos viejos
 archivo_antiguo/
+imagenes_telegram/
 .DS_Store
 *.swp
 *.swo

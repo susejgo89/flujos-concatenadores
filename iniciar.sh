@@ -31,7 +31,22 @@ else
     echo "✅ n8n iniciado en http://localhost:5678"
 fi
 
+# 3. Iniciar el Bot de Telegram si no está corriendo
+if pgrep -f "telegram_bot.py" > /dev/null; then
+    echo "✅ Bot de Telegram ya está activo."
+else
+    echo "🤖 Iniciando Bot de Telegram (@Su_creador_videos_bot)..."
+    nohup python3 "$DIR/telegram_bot.py" > "$DIR/telegram_bot.log" 2>&1 &
+    sleep 1
+    if pgrep -f "telegram_bot.py" > /dev/null; then
+        echo "✅ Bot de Telegram iniciado con éxito."
+    else
+        echo "⚠️ No se pudo iniciar el bot de Telegram. Revisa telegram_bot.log."
+    fi
+fi
+
 echo ""
-echo "🎉 ¡Todo listo! Puedes abrir n8n en:"
-echo "👉 http://localhost:5678"
+echo "🎉 ¡Todo listo!"
+echo "👉 n8n: http://localhost:5678"
+echo "👉 Bot de Telegram: @Su_creador_videos_bot"
 echo "=========================================="
