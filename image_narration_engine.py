@@ -56,9 +56,9 @@ def get_audio_duration(filepath):
         return 10.0
 
 
-async def _async_generate_tts_with_word_timings(text, output_mp3, voice):
+async def _async_generate_tts_with_word_timings(text, output_mp3, voice, pitch="+0Hz", rate="+0%"):
     """Genera audio MP3 y captura marcas de tiempo exactas palabra por palabra con Edge-TTS."""
-    communicate = edge_tts.Communicate(text, voice, boundary="WordBoundary")
+    communicate = edge_tts.Communicate(text, voice, boundary="WordBoundary", pitch=pitch, rate=rate)
     words_timing = []
     with open(output_mp3, "wb") as f:
         async for chunk in communicate.stream():
@@ -75,21 +75,23 @@ async def _async_generate_tts_with_word_timings(text, output_mp3, voice):
     return words_timing
 
 
-def generate_tts_voice(text, output_mp3, voice="es-MX-JorgeNeural"):
+def generate_tts_voice(text, output_mp3, voice="es-EC-LuisNeural", pitch="+0Hz", rate="+0%"):
     """
     Genera la locución de voz con Edge-TTS y captura marcas de tiempo palabra por palabra
     (WordBoundary) para lograr sincronización milimétrica de subtítulos (Opción 1).
     """
-    print(f"🎙️ Generando narración en off con voz ({voice}) y marcas de tiempo exactas...")
+    print(f"🎙️ Generando narración en off con voz ({voice}, pitch: {pitch}, rate: {rate}) y marcas de tiempo exactas...")
     words_timing = []
     try:
-        words_timing = asyncio.run(_async_generate_tts_with_word_timings(text, output_mp3, voice))
+        words_timing = asyncio.run(_async_generate_tts_with_word_timings(text, output_mp3, voice, pitch, rate))
     except Exception as e:
         print(f"⚠️ Aviso en generación asíncrona: {e}. Usando fallback CLI...")
         cmd = [
             "edge-tts",
             "--voice", voice,
             "--text", text,
+            "--pitch", pitch,
+            "--rate", rate,
             "--write-media", output_mp3
         ]
         res = subprocess.run(cmd, capture_output=True, text=True)
@@ -464,8 +466,9 @@ def process_image_narration(params):
 
     # 3. Generar la narración en off con Edge-TTS
     timestamp = time.strftime("%Y%m%d_%H%M%S")
-    audio_path = os.path.join(VIDEOS_DIR, f"audio_narracion_{timestamp}.mp3")
-    words_timing = generate_tts_voice(texto_narracion, audio_path, voice=voz)
+    pitch = params.get("pitch") or ("-4Hz" if "luis" in voz.lower() else "+0Hz")
+    rate = params.get("rate") or "+0%"
+    words_timing = generate_tts_voice(texto_narracion, audio_path, voice=voz, pitch=pitch, rate=rate)
     audio_duration = get_audio_duration(audio_path)
     print(f"⏱️ Duración exacta de la narración de audio: {audio_duration:.2f} segundos.")
 

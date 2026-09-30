@@ -273,7 +273,7 @@ def process_video_task(chat_id, user_info, photo_file_ids, caption):
         # Actualizar progreso a Fase 1: Locución
         edit_message(
             chat_id, status_msg_id,
-            f"🎙️ <b>[Paso 1/3]</b> Fotos listas ({downloaded_count}). Generando locución de <b>Jorge</b> ({palabras} palabras)...\n"
+            f"🎙️ <b>[Paso 1/3]</b> Fotos listas ({downloaded_count}). Generando locución de <b>Luis</b> ({palabras} palabras)...\n"
             f"⚡ <i>Sincronizando tiempos de audio...</i>"
         )
         send_chat_action(chat_id, "record_video")
@@ -282,7 +282,8 @@ def process_video_task(chat_id, user_info, photo_file_ids, caption):
         params = {
             "carpeta_imagenes": session_dir,
             "texto_narracion": caption,
-            "voz": "es-MX-JorgeNeural",
+            "voz": "es-EC-LuisNeural",
+            "pitch": "-4Hz",
             "estilo_subtitulos": "documental",
             "transicion": "dissolve",
             "duracion_transicion_segundos": 0.6,
@@ -327,7 +328,7 @@ def process_video_task(chat_id, user_info, photo_file_ids, caption):
             f"🎬 <b>¡Tu video está listo!</b>\n"
             f"⏱️ Duración: <b>{duracion:.1f}s</b>\n"
             f"🖼️ Fotos usadas: <b>{downloaded_count}</b>\n"
-            f"🗣️ Voz: <code>Jorge (Misterio / Curiosidades)</code>\n\n"
+            f"🗣️ Voz: <code>Luis (Hombre Maduro / Cálido)</code>\n\n"
             f"✨ <i>Para hacer otro video, envía fotos o un nuevo guion cuando quieras.</i>"
         )
 
