@@ -75,7 +75,7 @@ async def _async_generate_tts_with_word_timings(text, output_mp3, voice, pitch="
     return words_timing
 
 
-def generate_tts_voice(text, output_mp3, voice="es-EC-LuisNeural", pitch="+0Hz", rate="+0%"):
+def generate_tts_voice(text, output_mp3, voice="es-EC-LuisNeural", pitch="-6Hz", rate="-10%"):
     """
     Genera la locución de voz con Edge-TTS y captura marcas de tiempo palabra por palabra
     (WordBoundary) para lograr sincronización milimétrica de subtítulos (Opción 1).
@@ -466,8 +466,8 @@ def process_image_narration(params):
 
     # 3. Generar la narración en off con Edge-TTS
     timestamp = time.strftime("%Y%m%d_%H%M%S")
-    pitch = params.get("pitch") or ("-4Hz" if "luis" in voz.lower() else "+0Hz")
-    rate = params.get("rate") or "+0%"
+    pitch = params.get("pitch") or ("-6Hz" if "luis" in voz.lower() else "+0Hz")
+    rate = params.get("rate") or ("-10%" if "luis" in voz.lower() else "+0%")
     words_timing = generate_tts_voice(texto_narracion, audio_path, voice=voz, pitch=pitch, rate=rate)
     audio_duration = get_audio_duration(audio_path)
     print(f"⏱️ Duración exacta de la narración de audio: {audio_duration:.2f} segundos.")

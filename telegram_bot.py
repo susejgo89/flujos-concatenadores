@@ -336,8 +336,8 @@ def process_video_task(chat_id, user_info, photo_file_ids, caption):
             send_message(chat_id, "❌ No se pudieron descargar las imágenes. Por favor intenta de nuevo.")
             return
 
-        # Obtener voz seleccionada por este usuario (o default Luis)
-        user_voice = user_voice_selection.get(chat_id, VOICE_PROFILES["luis"])
+        # Obtener voz seleccionada por este usuario (o default Luis Abuelo)
+        user_voice = user_voice_selection.get(chat_id, VOICE_PROFILES["luis_abuelo"])
 
         # Actualizar progreso a Fase 1: Locución
         edit_message(
@@ -352,8 +352,8 @@ def process_video_task(chat_id, user_info, photo_file_ids, caption):
             "carpeta_imagenes": session_dir,
             "texto_narracion": caption,
             "voz": user_voice["voz"],
-            "pitch": user_voice.get("pitch", "-4Hz"),
-            "rate": user_voice.get("rate", "+0%"),
+            "pitch": user_voice.get("pitch", "-6Hz"),
+            "rate": user_voice.get("rate", "-10%"),
             "estilo_subtitulos": "documental",
             "transicion": "dissolve",
             "duracion_transicion_segundos": 0.6,
@@ -574,7 +574,7 @@ def run_telegram_bot():
                     or "como abuelo" in text_lower
                 )
                 if is_abuelo_request:
-                    current_v = user_voice_selection.get(chat_id, VOICE_PROFILES["luis"])
+                    current_v = user_voice_selection.get(chat_id, VOICE_PROFILES["luis_abuelo"])
                     send_message(
                         chat_id,
                         f"👴 <b>Audición de Voces Tipo Abuelo / Narrador Sabio</b>\n\n"
@@ -643,7 +643,7 @@ def run_telegram_bot():
 
                 # 6. Comando /voz (Consultar voz actual)
                 if text_lower in ["/voz", "voz", "mi voz", "/voces_actual"]:
-                    current_v = user_voice_selection.get(chat_id, VOICE_PROFILES["luis"])
+                    current_v = user_voice_selection.get(chat_id, VOICE_PROFILES["luis_abuelo"])
                     send_message(
                         chat_id,
                         f"🎙️ <b>Voz actual de tu narrador:</b>\n"
